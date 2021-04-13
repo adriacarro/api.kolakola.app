@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  place: one
+  name: 
+  avg_serving_time: 1
+
+two:
+  place: two
+  name: 
+  avg_serving_time: 1

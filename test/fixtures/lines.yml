@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  service: one
+  customer: one
+  worker: one
+  code: MyString
+  status: 1
+  position: 1
+  queueing_time: 1
+  serving_time: 1
+
+two:
+  service: two
+  customer: two
+  worker: two
+  code: MyString
+  status: 1
+  position: 1
+  queueing_time: 1
+  serving_time: 1
