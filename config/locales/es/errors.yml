@@ -1,0 +1,20 @@
+es:
+  action_controller:
+    parameter_missing: 'Parámetro no encontrado o vacío: %{param}'
+  activerecord:
+    record_not_found: '%{model} no encontrado'
+    errors:
+      messages:
+        validation_failed: "Validación fallida"
+        record_failed: "Validación fallida - %{model} %{id}"
+        record_invalid: 'La validación falló: %{errors}'
+        invitation_already_accepted: "Este usuario ya ha aceptado su invitación"
+        not_allowed_to_perform_this_action: "No tienes permisos para realizar esta acción"
+        restrict_dependent_destroy:
+          has_one: No se puede eliminar el registro porque existe un %{record} dependiente
+          has_many: No se puede eliminar el registro porque existen %{record} dependientes
+  jwt:
+    decode_error: No se puede decodificar el token de autenticación
+    expired_signature: Token de autenticación caducado
+    immature_signature: Token incorrecto
+    invalid_issuer_error: Token incorrecto

@@ -1,0 +1,24 @@
+en:
+  activerecord:
+    errors:
+      models:
+        user:
+          attributes:
+            base:
+              email_or_password_incorrect: El email y/o password no son correctos
+              accept_invite: Aún no has completado el registro. Accede al email de invitación a la plataforma.
+              account_locked: Tu cuenta ha sido bloqueada 5 minutos
+              max_failed_attempts: Has superado el límite de intentos. Hemos bloqueado tu cuenta durante 5 minutos
+            email:
+              blank: 'Debes escribir el email'
+              taken: 'El email ya existe'
+              invalid: 'El email no tiene el formato correcto'
+            password:
+              blank: 'Debes escribir un contraseña'
+              too_short: 'La contraseña debe tener 8 carácteres como mínimo'
+              too_long: 'La contraseña no puede tener más de 60 carácteres'
+              wrong_length: 'La contraseña debe tener 8 carácteres como mínimo'
+              invalid: 'La contraseña debe tener al menos una letra y un número o carácter especial (@#!?;:+-/*()[],.{}$€& )'
+            password_confirmation:
+              blank: 'Debes confirmar la contraseña'
+              confirmation: 'Los passwords no coinciden'

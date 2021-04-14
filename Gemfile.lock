@@ -105,6 +105,7 @@ GEM
     nokogiri (1.11.3)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
+    pagy (3.12.0)
     pg (1.2.3)
     puma (5.2.2)
       nio4r (~> 2.0)
@@ -176,6 +177,7 @@ DEPENDENCIES
   jwt
   listen (~> 3.3)
   mobility
+  pagy
   pg (~> 1.1)
   puma (~> 5.0)
   pundit

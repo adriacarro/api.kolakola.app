@@ -1,0 +1,1 @@
+User.create(role: :admin, email: 'adria.carro+turris@gmail.com', first_name: 'Adrià', last_name: 'Carro', place_id: Place.first.id)

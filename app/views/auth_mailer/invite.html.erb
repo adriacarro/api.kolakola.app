@@ -1,0 +1,6 @@
+<main>
+	<p>
+		Hi <%= @user.name %>,
+    Follow <%= link_to 'this link', "#{Rails.configuration.application.app_url}/signup?token=#{@user.invite_token}" %> to accept the invite!
+	</p>
+</main>

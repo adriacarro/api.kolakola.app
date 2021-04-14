@@ -3,6 +3,7 @@ class Service < ApplicationRecord
 
   # Relations
   belongs_to :place
+  has_many :users, -> { order(first_name: :asc) }, dependent: :destroy
   has_many :lines, dependent: :nullify
 
   # Extensions

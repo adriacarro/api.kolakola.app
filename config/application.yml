@@ -1,0 +1,26 @@
+default: &default
+  title: KolaKola API
+  name: api.kolakola.app
+  repo: ssh://git-codecommit.eu-west-1.amazonaws.com/v1/repos/api.kolakola.app
+  url:  api.kolakola.app
+
+development:
+  <<: *default
+  base_url: 'http://localhost:3000'
+  app_url: 'http://localhost:3000'
+  error_receivers:
+    - adria@digitalyou.es
+
+staging:
+  <<: *default
+  base_url: 'http://localhost:3000'
+  app_url: 'http://localhost:3000'
+  error_receivers:
+    - adria@digitalyou.es
+
+production:
+  <<: *default
+  base_url: 'https://api.kolakola.app'
+  app_url: 'https://api.kolakola.app'
+  error_receivers:
+    - adria@digitalyou.es

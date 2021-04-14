@@ -2,9 +2,11 @@
 
 class User < ApplicationRecord
   #  Relations
+  belongs_to :place, optional: true
+  belongs_to :service, optional: true
 
   # Validations
-  validates :email, presence: true, uniqueness: { scope: :platform, case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :email, presence: true, uniqueness: { scope: :place, case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, presence: true, if: -> { new_record? }
   validates :password, length: { in: 8..60 }, if: -> { new_record? || !password.nil? }
   validates :password, format: { with: /(?=.*[a-zA-Z])((?=.*[0-9])|(?=.*([[:print:]][^[[:alnum:]]]))).{8,}/ }, if: -> { new_record? || !password.nil? }
@@ -22,7 +24,7 @@ class User < ApplicationRecord
   has_secure_token :reset_password_token
 
   # Scopes
-  scope :search, ->(q) { where('email ILIKE :q OR name ILIKE :q', q: "%#{q}%") }
+  scope :search, ->(q) { where('email ILIKE :q OR first_name ILIKE :q', q: "%#{q}%") }
   scope :sent, -> { where(invite_accepted: false) }
   scope :accepted, -> { where(invite_accepted: true) }
   scope :with_failed_attempts, -> { where('failed_attempts > 0') }
@@ -47,7 +49,7 @@ class User < ApplicationRecord
   def reset_password!
     regenerate_reset_password_token
     update_columns(reset_password_sent_at: Time.now)
-    App::AuthMailer.reset_password(self).deliver_later
+    AuthMailer.reset_password(self).deliver_later
   end
 
   def reset_password_expired?
@@ -57,12 +59,11 @@ class User < ApplicationRecord
   def invite!
     raise Error::AuthorizationError.new(403, :forbidden, I18n.t('activerecord.errors.messages.invitation_already_accepted')) if invite_accepted
     update(invite_token: JsonWebToken.encode(invite_json, 1.year.from_now), invited_at: Time.now, invite_accepted: false)
-    App::AuthMailer.invite(self).deliver_later
+    AuthMailer.invite(self).deliver_later
   end
 
   def invite_json
-    return { user: { role: role }, vet: nil } unless vet_manager?
-    { user: { role: role }, vet: { id: vet.id, comercial_name: vet.comercial_name, comercial_address: vet.comercial_address, comercial_postal_code: vet.comercial_postal_code, comercial_province: vet.comercial_province, comercial_city: vet.comercial_city, comercial_phone: vet.comercial_phone, fiscal_name: vet.fiscal_name, fiscal_address: vet.fiscal_address, fiscal_postal_code: vet.fiscal_postal_code, fiscal_province: vet.fiscal_province, fiscal_city: vet.fiscal_city, fiscal_cif: vet.fiscal_cif, fiscal_iban: vet.fiscal_iban } }
+    { user: { role: role } }
   end
 
   def invitation
@@ -74,6 +75,10 @@ class User < ApplicationRecord
     user = User.new
     user.errors.add(:base, :email_or_password_incorrect)
     user
+  end
+
+  def name
+    [first_name, last_name].compact.join(' ')
   end
 
   private
@@ -110,9 +115,5 @@ class User < ApplicationRecord
     def clean_fields
       self.reset_password_token = nil
       self.reset_password_sent_at = nil
-    end
-
-    def correct_platform(platform_param)
-      self.platform == platform_param
     end
 end
