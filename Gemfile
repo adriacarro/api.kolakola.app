@@ -44,3 +44,15 @@ gem 'mobility'
 
 # Model lists
 gem 'acts_as_list'
+
+# Authorization System
+gem 'pundit'
+
+# API OAuth
+gem 'jwt'
+
+#  Serialize models
+gem 'active_model_serializers'
+
+# Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
+gem 'rack-cors'
