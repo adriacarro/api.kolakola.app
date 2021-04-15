@@ -2,12 +2,6 @@
 
 class V1::UsersController < ApplicationController
   before_action :find_user, except: %i[create index]
-  before_action only: [:index, :create, :invite, :destroy] do
-    authorize_roles(%w[admin])
-  end
-  before_action only: [:show, :update] do
-    authorize_roles(%w[admin worker])
-  end
 
   # GET /users
   def index
@@ -49,7 +43,8 @@ class V1::UsersController < ApplicationController
     end
 
     def filtered_users
-      users = policy_scope(User)
+      authorize User
+      users = current_user.place.users
       users = users.search(params[:q]) if params[:q].present?
       users = users.send(params[:status]) if params[:status].present? && ['all', 'sent', 'accepted'].include?(params[:status])
       users
