@@ -21,6 +21,7 @@ class CreateUsers < ActiveRecord::Migration[6.1]
       t.datetime :invited_at
       t.string :invite_token
       t.boolean :invite_accepted, default: false
+      t.datetime :invite_accepted_at
 
       t.timestamps
       

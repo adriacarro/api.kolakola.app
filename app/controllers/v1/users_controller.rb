@@ -45,6 +45,7 @@ class V1::UsersController < ApplicationController
     def filtered_users
       authorize User
       users = current_user.place.users
+      users = users.send(params[:type]) if params[:type].present? && ['admin', 'worker'].include?(params[:type])
       users = users.search(params[:q]) if params[:q].present?
       users = users.send(params[:status]) if params[:status].present? && ['all', 'sent', 'accepted'].include?(params[:status])
       users

@@ -102,6 +102,7 @@ ActiveRecord::Schema.define(version: 2021_04_13_205117) do
     t.datetime "invited_at"
     t.string "invite_token"
     t.boolean "invite_accepted", default: false
+    t.datetime "invite_accepted_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["email"], name: "index_users_on_email", unique: true

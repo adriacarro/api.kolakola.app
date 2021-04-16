@@ -1,11 +1,5 @@
-<% url = (Rails.env == 'development' || Rails.env == 'staging') ? 'staging.apib2c.es.virbac.com' : 'apib2c.es.virbac.com' %>
-<% platform_url = @user.vetapp? ? URI::HTTPS.build(host: Rails.configuration.application.vet_app).to_s : URI::HTTPS.build(host: url).to_s %>
-
-<%= render partial: 'app/shared/header', locals: { title: t("app.auth_mailer.welcome.#{@user.platform}.title.#{@user.role}", name: @user.name) } %>
-
 <main>
-	<%= raw t("app.auth_mailer.welcome.#{@user.platform}.body.#{@user.role}", url: platform_url ) %>
+	<p>
+		Hi <%= @user.name %>,
+	</p>
 </main>
-
-<%= render partial: 'app/shared/signature' %>
-<%= render partial: 'app/shared/footer', locals: { text: t("app.auth_mailer.welcome.#{@user.platform}.footer", mail: Rails.configuration.application.contact_email) } %>
