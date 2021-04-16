@@ -13,9 +13,10 @@
 ActiveRecord::Schema.define(version: 2021_04_13_205117) do
 
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pgcrypto"
   enable_extension "plpgsql"
 
-  create_table "addresses", force: :cascade do |t|
+  create_table "addresses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.string "code"
     t.string "street_1"
@@ -28,16 +29,16 @@ ActiveRecord::Schema.define(version: 2021_04_13_205117) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "categories", force: :cascade do |t|
+  create_table "categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.json "name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "lines", force: :cascade do |t|
-    t.bigint "service_id"
-    t.bigint "customer_id"
-    t.bigint "worker_id"
+  create_table "lines", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "service_id"
+    t.uuid "customer_id"
+    t.uuid "worker_id"
     t.string "code"
     t.integer "status", default: 0
     t.integer "position"
@@ -50,11 +51,11 @@ ActiveRecord::Schema.define(version: 2021_04_13_205117) do
     t.index ["worker_id"], name: "index_lines_on_worker_id"
   end
 
-  create_table "places", force: :cascade do |t|
+  create_table "places", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
-    t.bigint "category_id", null: false
-    t.bigint "billing_address_id", null: false
-    t.bigint "address_id", null: false
+    t.uuid "category_id", null: false
+    t.uuid "billing_address_id", null: false
+    t.uuid "address_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["address_id"], name: "index_places_on_address_id"
@@ -62,8 +63,8 @@ ActiveRecord::Schema.define(version: 2021_04_13_205117) do
     t.index ["category_id"], name: "index_places_on_category_id"
   end
 
-  create_table "promotions", force: :cascade do |t|
-    t.bigint "place_id", null: false
+  create_table "promotions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "place_id", null: false
     t.json "title"
     t.json "message"
     t.integer "position"
@@ -72,8 +73,8 @@ ActiveRecord::Schema.define(version: 2021_04_13_205117) do
     t.index ["place_id"], name: "index_promotions_on_place_id"
   end
 
-  create_table "services", force: :cascade do |t|
-    t.bigint "place_id", null: false
+  create_table "services", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "place_id", null: false
     t.json "name"
     t.integer "avg_serving_time", default: 0
     t.datetime "created_at", precision: 6, null: false
@@ -81,7 +82,7 @@ ActiveRecord::Schema.define(version: 2021_04_13_205117) do
     t.index ["place_id"], name: "index_services_on_place_id"
   end
 
-  create_table "users", force: :cascade do |t|
+  create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.integer "role", default: 0
     t.string "cookie"
     t.string "first_name"
@@ -90,8 +91,8 @@ ActiveRecord::Schema.define(version: 2021_04_13_205117) do
     t.integer "notification_type", default: 0
     t.string "phone"
     t.boolean "active", default: true
-    t.bigint "place_id"
-    t.bigint "service_id"
+    t.uuid "place_id"
+    t.uuid "service_id"
     t.string "password_digest"
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"

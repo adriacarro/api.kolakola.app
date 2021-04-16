@@ -16,6 +16,7 @@ class V1::UsersController < ApplicationController
 
   # POST /users
   def create
+    authorize User
     @user = User.create!(user_params.merge({place_id: current_user.place.id, role: :worker}))
   end
 

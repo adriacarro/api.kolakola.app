@@ -1,6 +1,6 @@
 class CreateUsers < ActiveRecord::Migration[6.1]
   def change
-    create_table :users do |t|
+    create_table :users, id: :uuid do |t|
       t.integer :role, default: 0
       t.string :cookie
       t.string :first_name
@@ -9,8 +9,8 @@ class CreateUsers < ActiveRecord::Migration[6.1]
       t.integer :notification_type, default: 0
       t.string :phone
       t.boolean :active, default: true
-      t.references :place, null: true, foreign_key: true
-      t.references :service, null: true, foreign_key: true
+      t.references :place, null: true, foreign_key: true, type: :uuid
+      t.references :service, null: true, foreign_key: true, type: :uuid
       t.string :password_digest
       t.string :reset_password_token
       t.datetime :reset_password_sent_at
