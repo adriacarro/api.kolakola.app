@@ -21,6 +21,6 @@ class V1::PlacesController < ApplicationController
     end
 
     def place_params
-      params.require(:place).permit(:name, :category_id, address_attributes: {:name, :code, :street_1, :street_2, :city, :state, :zip_code, :country_code}, billing_address_attributes: {:name, :code, :street_1, :street_2, :city, :state, :zip_code, :country_code})
+      params.require(:place).permit(:name, :category_id, address_attributes: [:name, :code, :street_1, :street_2, :city, :state, :zip_code, :country_code], billing_address_attributes: [:name, :code, :street_1, :street_2, :city, :state, :zip_code, :country_code])
     end
 end
