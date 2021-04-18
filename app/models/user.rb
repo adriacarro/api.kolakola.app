@@ -26,6 +26,7 @@ class User < ApplicationRecord
 
   # Scopes
   scope :search, ->(q) { where('email ILIKE :q OR first_name ILIKE :q', q: "%#{q}%") }
+  scope :active, -> { where(active: true) }
   scope :sent, -> { where(invite_accepted: false) }
   scope :accepted, -> { where(invite_accepted: true) }
   scope :with_failed_attempts, -> { where('failed_attempts > 0') }

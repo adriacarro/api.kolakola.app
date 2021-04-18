@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class V1::ServicesController < ApplicationController
+  skip_before_action :authorize_request, only: :enqueue
   before_action :find_service, except: %i[create index]
 
   # GET /services
@@ -34,6 +35,7 @@ class V1::ServicesController < ApplicationController
 
   # POST /services/{id}/enqueue
   def enqueue
+    # TODO: Create user if needed
     @line = @service.lines.create!(customer_id: current_user.id)
     render json: @line, status: :ok
   end

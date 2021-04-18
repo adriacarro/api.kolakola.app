@@ -9,7 +9,7 @@ class V1::LinesController < ApplicationController
 
   # PUT /queues/{id}
   def update
-    @queue.update!(queue_params)
+    @queue.send("#{params[:status]}!")
     render json: @queue, status: :ok
   end
 

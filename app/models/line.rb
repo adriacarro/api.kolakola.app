@@ -12,6 +12,7 @@ class Line < ApplicationRecord
 
   # Callbacks
   before_create :assign_unique_code
+  after_create :im_the_next_one?
 
   # Scope
   default_scope -> { order(position: :asc) }
@@ -22,21 +23,20 @@ class Line < ApplicationRecord
 
     update_columns(status: :pending, queueing_time: Datetime.now.to_f - created_at.to_f)
     remove_from_list
-    start_queue_handshake
   end
 
   def served!
     return if served?
 
     update_columns(status: :served, serving_time: Datetime.now.to_f - (created_at + queueing_time.seconds).to_f)
-    call_to_next
+    call_to_next(from: worker)
   end
 
   def abandoned!
     return if abandoned?
     super
 
-    position.blank? ? call_to_next : remove_from_list # If they weren't in the queue is because they were in handshake, otherwise, move the queue
+    position.blank? ? call_to_next(from: worker) : remove_from_list # If they weren't in the queue is because they were in handshake, otherwise, move the queue
   end
 
   private
@@ -48,11 +48,16 @@ class Line < ApplicationRecord
     end
   end
 
-  def start_queue_handshake
-    # Notify customer that is his/her turn
+  def im_the_next_one?
+    # call_to_next(from: service.workers.active.any?) if position == 1 && service.lines.
   end
 
-  def call_to_next
-    next_to_be_served = service.lines.waiting.first&.pending!
+  # 1st step queue handshake
+  def call_to_next(from:)
+    next_to_be_served = service.lines.waiting.first
+    return if next_to_be_served.nil? # No more attendees
+
+    # Start queue handshake
+    next_to_be_served.update_columns(worker_id: from.id)
   end
 end
