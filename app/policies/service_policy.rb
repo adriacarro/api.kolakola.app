@@ -2,11 +2,11 @@
 
 class ServicePolicy < ApplicationPolicy
   def index?
-    user.admin?
+    ( user.admin? || user.worker? )
   end
 
   def show?
-    user.admin? && record.place_id == user.place_id
+    ( user.admin? || user.worker? ) && record.place_id == user.place_id
   end
 
   def create?
@@ -19,5 +19,9 @@ class ServicePolicy < ApplicationPolicy
 
   def destroy?
     user.admin? && record.place_id == user.place_id
+  end
+
+  def enqueue?
+    user.client?
   end
 end

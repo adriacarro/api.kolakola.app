@@ -17,6 +17,7 @@ class V1::ServicesController < ApplicationController
   # POST /services
   def create
     @service = Service.create!(service_params.merge({place_id: current_service.place.id}))
+    render json: @service, status: :ok
   end
 
   # PUT /services/{id}
@@ -28,6 +29,13 @@ class V1::ServicesController < ApplicationController
   # DELETE /services/{id}
   def destroy
     @service.destroy
+    head :no_content
+  end
+
+  # POST /services/{id}/enqueue
+  def enqueue
+    @line = @service.lines.create!(customer_id: current_user.id)
+    render json: @line, status: :ok
   end
 
   private

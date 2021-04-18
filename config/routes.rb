@@ -11,9 +11,16 @@ Rails.application.routes.draw do
 
     resources :users do
       post :invite, on: :member
+      post :break, on: :member
+      delete :break, on: :member
     end
 
     resources :places, only: [:show, :update]
-    resources :services
+    resources :services do
+      post :enqueue, on: :member
+    end
+    resources :queues, controller: :lines, only: [:update, :delete] do
+      post :yield, on: :member
+    end
   end
 end

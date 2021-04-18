@@ -18,6 +18,7 @@ class V1::UsersController < ApplicationController
   def create
     authorize User
     @user = User.create!(user_params.merge({place_id: current_user.place.id, role: :worker}))
+    render json: @user, status: :ok
   end
 
   # PUT /users/{id}
@@ -30,11 +31,19 @@ class V1::UsersController < ApplicationController
   # POST /users/{id}/invite
   def invite
     @user.invite!
+    head :no_content
+  end
+
+  # POST/DESTROY /users/{id}/break
+  def break
+    @user.send("#{request.post? ? 'start' : 'finish'}_break!")
+    head :no_content
   end
 
   # DELETE /users/{id}
   def destroy
     @user.destroy
+    head :no_content
   end
 
   private

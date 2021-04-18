@@ -6,7 +6,7 @@ class UserPolicy < ApplicationPolicy
   end
 
   def show?
-    user.admin? || record.id == user.id
+    ( user.admin? && user.place_id == record.place_id) || record.id == user.id
   end
 
   def create?
@@ -14,14 +14,18 @@ class UserPolicy < ApplicationPolicy
   end
 
   def update?
-    user.admin? || record.id == user.id
+    (user.admin? && user.place_id == record.place_id) || record.id == user.id
   end
 
   def invite?
-    user.admin?
+    user.admin? && user.place_id == record.place_id
+  end
+
+  def break?
+    user.admin? && user.place_id == record.place_id
   end
 
   def destroy?
-    user.admin?
+    user.admin? && user.place_id == record.place_id
   end
 end

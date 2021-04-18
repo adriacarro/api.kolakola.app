@@ -14,6 +14,7 @@ class User < ApplicationRecord
 
   #  Attributes
   enum role: %i[admin worker customer]
+  enum notification_type: %i[none web_notification whatsapp telegram sms]
 
   LOCKED_TIME = 5
   MAX_FAILED_ATTEMPTS = 5
@@ -79,6 +80,14 @@ class User < ApplicationRecord
 
   def name
     [first_name, last_name].compact.join(' ')
+  end
+
+  def start_break!
+    update_columns(active: false)
+  end
+
+  def finish_break!
+    update_columns(active: true)
   end
 
   private

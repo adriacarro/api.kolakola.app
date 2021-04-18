@@ -5,5 +5,4 @@ class PlaceSerializer < ActiveModel::Serializer
   belongs_to :billing_address
   belongs_to :address
   has_many :services
-
 end
