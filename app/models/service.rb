@@ -11,4 +11,21 @@ class Service < ApplicationRecord
 
   # Scopes
   default_scope -> { order("name->>'#{Mobility.locale}' asc") }
+
+  # Methods
+  def free_worker
+    users.active.where.not(id: lines.in_process.pluck(:worker_id)).shuffle.first&.id
+  end
+
+  def in_process
+    lines.in_process
+  end
+
+  def workers
+    users.active.count
+  end
+
+  def free_workers?
+    workers > in_process
+  end
 end

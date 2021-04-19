@@ -91,6 +91,18 @@ class User < ApplicationRecord
     update_columns(active: true)
   end
 
+  # 1st step of queue handshake
+  def call_to_next(service:)
+    # Do nothing if not a worker or not attending this service
+    return unless worker? && services.exists?(id: service.id)
+
+    next_to_be_served = service.lines.waiting.first
+    return if next_to_be_served.nil? # No more attendees
+
+    # Start queue handshake
+    next_to_be_served.start_handshake(worker: self)
+  end
+
   private
     def locked?
       failed_attempts == MAX_FAILED_ATTEMPTS && !locked_at.blank? && Time.now.between?(locked_at, locked_at + LOCKED_TIME.minutes)

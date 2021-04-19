@@ -10,33 +10,42 @@ class Line < ApplicationRecord
   # Attributes
   enum status: %i[waiting pending serving served abandoned]
 
+  # Scope
+  default_scope -> { order(position: :asc) }
+  scope :in_process, -> { where("status = :pending OR status = :serving", pending: Line.statuses[:pending], serving: Line.statuses[:serving]) }
+
   # Callbacks
   before_create :assign_unique_code
   after_create :im_the_next_one?
 
-  # Scope
-  default_scope -> { order(position: :asc) }
-
   # Methods
   def pending!
     return if pending?
+    super
 
-    update_columns(status: :pending, queueing_time: Datetime.now.to_f - created_at.to_f)
-    remove_from_list
+    # TODO: Send websocket to worker
+  end
+
+  def serving!
+    return if serving?
+
+    update_columns(status: :serving, pending_time: Datetime.now.to_f - (created_at + queueing_time.seconds).to_f)
+
+    # TODO: Send websocket to customer (Manuel is serving you!)
   end
 
   def served!
     return if served?
 
-    update_columns(status: :served, serving_time: Datetime.now.to_f - (created_at + queueing_time.seconds).to_f)
-    call_to_next(from: worker)
+    update_columns(status: :served, serving_time: Datetime.now.to_f - (created_at + queueing_time.seconds + serving_time.seconds).to_f)
+    worker.call_to_next(service: line.service)
   end
 
   def abandoned!
     return if abandoned?
     super
 
-    position.blank? ? call_to_next(from: worker) : remove_from_list # If they weren't in the queue is because they were in handshake, otherwise, move the queue
+    position.blank? ? worker.call_to_next(service: line.service) : remove_from_list # If they weren't in the queue is because they were in handshake, otherwise, move the queue
   end
 
   private
@@ -49,15 +58,15 @@ class Line < ApplicationRecord
   end
 
   def im_the_next_one?
-    # call_to_next(from: service.workers.active.any?) if position == 1 && service.lines.
+    return unless position == 1 && line.service.free_workers?
+    line.service.free_worker&.call_to_next(service: line.service)
   end
 
-  # 1st step queue handshake
-  def call_to_next(from:)
-    next_to_be_served = service.lines.waiting.first
-    return if next_to_be_served.nil? # No more attendees
-
-    # Start queue handshake
-    next_to_be_served.update_columns(worker_id: from.id)
+  def start_handshake(worker:)
+    remove_from_list
+    update_columns(worker_id: worker.id, queueing_time: Datetime.now.to_f - created_at.to_f)
+    
+    # TODO: Send websocket to customer (Is your turn, are you there?)
+    # TODO: Send websocket to worker (Waiting for next with code XXX)
   end
 end
