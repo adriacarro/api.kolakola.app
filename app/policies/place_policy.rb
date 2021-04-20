@@ -2,7 +2,7 @@
 
 class PlacePolicy < ApplicationPolicy
   def show?
-    user.client? || user.place_id == record.id
+    user.customer? || user.place_id == record.id
   end
 
   def update?

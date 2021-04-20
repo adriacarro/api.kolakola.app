@@ -4,12 +4,14 @@ Rails.application.routes.draw do
     # Auth
     scope path: 'auth' do
       post 'login', to: 'authentication#login'
+      post 'guest', to: 'authentication#guest'
       post 'signup', to: 'authentication#signup'
       post 'forgot_password', to: 'authentication#forgot_password'
       post 'reset_password', to: 'authentication#reset_password'
     end
 
     resources :users do
+      delete :logout, on: :member
       post :invite, on: :member
       post :break, on: :member
       delete :break, on: :member

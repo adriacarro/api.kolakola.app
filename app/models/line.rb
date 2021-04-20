@@ -2,7 +2,7 @@ class Line < ApplicationRecord
   # Relations
   belongs_to :service
   belongs_to :customer, class_name: "User", foreign_key: "customer_id"
-  belongs_to :worker, class_name: "User", foreign_key: "worker_id"
+  belongs_to :worker, class_name: "User", foreign_key: "worker_id", optional: true
 
   # Extensions
   acts_as_list scope: [:service_id, :status]
@@ -38,14 +38,14 @@ class Line < ApplicationRecord
     return if served?
 
     update_columns(status: :served, serving_time: Datetime.now.to_f - (created_at + queueing_time.seconds + serving_time.seconds).to_f)
-    worker.call_to_next(service: line.service)
+    worker.call_to_next(service: service)
   end
 
   def abandoned!
     return if abandoned?
     super
 
-    position.blank? ? worker.call_to_next(service: line.service) : remove_from_list # If they weren't in the queue is because they were in handshake, otherwise, move the queue
+    position.blank? ? worker.call_to_next(service: service) : remove_from_list # If they weren't in the queue is because they were in handshake, otherwise, move the queue
   end
 
   private
@@ -53,13 +53,13 @@ class Line < ApplicationRecord
   def assign_unique_code
     self.code = loop do
       code = SecureRandom.alphanumeric(6).upcase
-      break code unless Line.where(service_id: service_id).waiting.exists?(token: code)
+      break code unless Line.where(service_id: service_id).waiting.exists?(code: code)
     end
   end
 
   def im_the_next_one?
-    return unless position == 1 && line.service.free_workers?
-    line.service.free_worker&.call_to_next(service: line.service)
+    return unless position == 1 && service.free_workers?
+    service.free_worker&.call_to_next(service: service)
   end
 
   def start_handshake(worker:)

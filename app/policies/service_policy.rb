@@ -22,6 +22,6 @@ class ServicePolicy < ApplicationPolicy
   end
 
   def enqueue?
-    user.client?
+    user.customer?
   end
 end

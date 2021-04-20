@@ -10,7 +10,7 @@ class Service < ApplicationRecord
   translates :name
 
   # Scopes
-  default_scope -> { order("name->>'#{Mobility.locale}' asc") }
+  default_scope -> { i18n.order(name: :asc) }
 
   # Methods
   def free_worker
@@ -18,7 +18,7 @@ class Service < ApplicationRecord
   end
 
   def in_process
-    lines.in_process
+    lines.in_process.count
   end
 
   def workers

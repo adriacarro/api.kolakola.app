@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class V1::AuthenticationController < ApplicationController
+  include ActionController::Cookies
   skip_before_action :authorize_request
 
   # POST /auth/login
@@ -9,6 +10,14 @@ class V1::AuthenticationController < ApplicationController
     raise ActiveModel::ValidationError.new(User.not_found) unless @user
 
     @user.authenticate!(params.require(:password))
+    cookies.signed[:user_id] = @user.id unless @user.errors.any?
+    render json: login_json, status: :ok
+  end
+
+  # POST /auth/guest
+  def guest
+    @user = User.find_or_create_by!(cookie: params[:cookie], role: :customer)
+    cookies.signed[:user_id] = @user.id
     render json: login_json, status: :ok
   end
 

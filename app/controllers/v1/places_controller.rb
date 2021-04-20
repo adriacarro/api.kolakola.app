@@ -5,18 +5,18 @@ class V1::PlacesController < ApplicationController
 
   # GET /places/{id}
   def show
-    render json: @place, status: :ok
+    render json: @place, user: current_user, status: :ok
   end
 
   # PUT /places/{id}
   def update
     @place.update!(place_params)
-    render json: @place, status: :ok
+    render json: @place, user: current_user, status: :ok
   end
 
   private
     def find_place
-      @place = current_user.place
+      @place = Place.find_by!(id: params[:id])
       authorize @place
     end
 

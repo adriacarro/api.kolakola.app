@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class V1::UsersController < ApplicationController
+  include ActionController::Cookies
   before_action :find_user, except: %i[create index]
 
   # GET /users
@@ -43,6 +44,12 @@ class V1::UsersController < ApplicationController
   # DELETE /users/{id}
   def destroy
     @user.destroy
+    head :no_content
+  end
+
+  # DELETE /users/{id}/logout
+  def logout
+    cookies.delete :user_id
     head :no_content
   end
 

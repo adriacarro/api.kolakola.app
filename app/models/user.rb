@@ -6,7 +6,7 @@ class User < ApplicationRecord
   belongs_to :service, optional: true
 
   # Validations
-  validates :email, presence: true, uniqueness: { scope: :place, case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :email, presence: true, uniqueness: { scope: :place, case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }, unless: -> { cookie.present? }
   validates :password, presence: true, if: -> { new_record? }
   validates :password, length: { in: 8..60 }, if: -> { new_record? || !password.nil? }
   validates :password, format: { with: /(?=.*[a-zA-Z])((?=.*[0-9])|(?=.*([[:print:]][^[[:alnum:]]]))).{8,}/ }, if: -> { new_record? || !password.nil? }
@@ -14,7 +14,7 @@ class User < ApplicationRecord
 
   #  Attributes
   enum role: %i[admin worker customer]
-  enum notification_type: %i[none web_notification whatsapp telegram sms]
+  enum notification_type: %i[undefined web_notification whatsapp telegram sms]
 
   LOCKED_TIME = 5
   MAX_FAILED_ATTEMPTS = 5
