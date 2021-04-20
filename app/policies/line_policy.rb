@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserPolicy < ApplicationPolicy
+class LinePolicy < ApplicationPolicy
   def yield?
     user.customer?
   end
