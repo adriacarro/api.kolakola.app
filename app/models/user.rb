@@ -6,7 +6,7 @@ class User < ApplicationRecord
   belongs_to :service, optional: true
 
   # Validations
-  validates :email, presence: true, uniqueness: { scope: :place, case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }, unless: -> { cookie.present? }
+  validates :email, presence: true, uniqueness: { scope: :place, case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }, unless: -> { customer? }
   validates :password, presence: true, if: -> { new_record? }
   validates :password, length: { in: 8..60 }, if: -> { new_record? || !password.nil? }
   validates :password, format: { with: /(?=.*[a-zA-Z])((?=.*[0-9])|(?=.*([[:print:]][^[[:alnum:]]]))).{8,}/ }, if: -> { new_record? || !password.nil? }
@@ -33,6 +33,7 @@ class User < ApplicationRecord
   scope :to_clean, -> { where("(reset_password_token is not null) and reset_password_sent_at < '#{(Time.now + 10.minutes).strftime('%Y-%m-%d %H:%M:%S')}'") }
 
   # Callbacks
+  before_create :set_cookie, if: -> { customer? }
   after_create :invite!
   before_validation :set_random_password, on: :create
   before_save :clean_fields, if: -> { password_confirmation.present? }
@@ -131,6 +132,13 @@ class User < ApplicationRecord
       loop do
         self.password = SecureRandom.urlsafe_base64(32)
         break if self.password.match?(/(?=.*[a-zA-Z])((?=.*[0-9])|(?=.*([[:print:]][^[[:alnum:]]]))).{8,}/)
+      end
+    end
+
+    def set_cookie
+      self.cookie = loop do
+        cookie = SecureRandom.alphanumeric(32).upcase
+        break cookie unless User.customer.exists?(cookie: cookie)
       end
     end
 

@@ -16,7 +16,7 @@ class V1::AuthenticationController < ApplicationController
 
   # POST /auth/guest
   def guest
-    @user = User.find_or_create_by!(cookie: params[:cookie], role: :customer)
+    @user = params[:cookie].present? ? User.find_by!(cookie: params[:cookie]) : User.create!(role: :customer)
     cookies.signed[:user_id] = @user.id
     render json: login_json, status: :ok
   end
@@ -51,9 +51,9 @@ class V1::AuthenticationController < ApplicationController
     end
 
     def login_json
-      token = JsonWebToken.encode({ user: { id: @user.id, email: @user.email, role: @user.role, place: @user&.place&.id } })
+      token = JsonWebToken.encode({ user: { id: @user.id, cookie: @user.cookie, role: @user.role, first_name: @user.first_name, last_name: @user.last_name, email: @user.email, place: @user&.place&.id } })
       time = Time.now + 24.hours.to_i
-      { token: token, exp: time.strftime('%m-%d-%Y %H:%M'), user: { id: @user.id, role: @user.role, first_name: @user.first_name, last_name: @user.last_name, email: @user.email, place: @user&.place&.id } }
+      { token: token, exp: time.strftime('%m-%d-%Y %H:%M') }
     end
 
     def signup_params
