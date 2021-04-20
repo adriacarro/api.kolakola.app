@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  # mount ActionCable.server => '/cable'
+
+  root to: 'application#root'
+
   namespace :v1 do
 
     # Auth

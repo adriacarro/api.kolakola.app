@@ -5,7 +5,7 @@ class ApplicationController < ActionController::API
   include Pundit
   include Pagy::Backend
 
-  before_action :authorize_request
+  before_action :authorize_request, except: [:root]
 
   attr_reader :current_user
 
@@ -36,5 +36,9 @@ class ApplicationController < ActionController::API
 
   def pagination_limit
     params[:limit].present? ? params[:limit].to_i : nil
+  end
+
+  def root
+    head :ok
   end
 end
