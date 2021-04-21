@@ -34,7 +34,7 @@ class V1::ServicesController < ApplicationController
 
   # POST /services/{id}/enqueue
   def enqueue
-    @line = @service.lines.create!(customer_id: current_user.id)
+    @line = @service.lines.find_by_or_create!(customer_id: current_user.id, status: :waiting)
     render json: @line, status: :ok
   end
 
