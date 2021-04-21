@@ -4,6 +4,7 @@ class User < ApplicationRecord
   #  Relations
   belongs_to :place, optional: true
   belongs_to :service, optional: true
+  has_many :lines, class_name: "Line", foreign_key: "customer_id"
 
   # Validations
   validates :email, presence: true, uniqueness: { scope: :place, case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }, unless: -> { customer? }
