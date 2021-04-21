@@ -21,6 +21,10 @@ class Service < ApplicationRecord
     lines.in_process.count
   end
 
+  def waiting
+    lines.waiting.count
+  end
+
   def workers
     users.active.count
   end

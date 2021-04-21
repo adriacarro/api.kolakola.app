@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::API
-  # include Error::ErrorHandler
+  include Error::ErrorHandler
   include Pundit
   include Pagy::Backend
 

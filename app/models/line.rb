@@ -23,7 +23,8 @@ class Line < ApplicationRecord
     return if pending?
     super
 
-    # TODO: Send websocket to worker
+    # Send websocket to worker (also customer)
+    LineChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(self).serializable_hash
   end
 
   def serving!
@@ -31,7 +32,8 @@ class Line < ApplicationRecord
 
     update_columns(status: :serving, pending_time: Datetime.now.to_f - (created_at + queueing_time.seconds).to_f)
 
-    # TODO: Send websocket to customer (Manuel is serving you!)
+    # Send websocket to customer (Manuel is serving you!) (also customer)
+    LineChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(self).serializable_hash
   end
 
   def served!
@@ -39,6 +41,9 @@ class Line < ApplicationRecord
 
     update_columns(status: :served, serving_time: Datetime.now.to_f - (created_at + queueing_time.seconds + serving_time.seconds).to_f)
     worker.call_to_next(service: service)
+
+    # Notifiy service subscribers that queue has been updated
+    ServiceChannel.broadcast_to service, ActiveModelSerializers::SerializableResource.new(service).serializable_hash
   end
 
   def abandoned!
@@ -46,6 +51,9 @@ class Line < ApplicationRecord
     super
 
     position.blank? ? worker.call_to_next(service: service) : remove_from_list # If they weren't in the queue is because they were in handshake, otherwise, move the queue
+
+    # Notifiy service subscribers that queue has been updated
+    ServiceChannel.broadcast_to service, ActiveModelSerializers::SerializableResource.new(service).serializable_hash
   end
 
   private
@@ -66,7 +74,8 @@ class Line < ApplicationRecord
     remove_from_list
     update_columns(worker_id: worker.id, queueing_time: Datetime.now.to_f - created_at.to_f)
     
-    # TODO: Send websocket to customer (Is your turn, are you there?)
-    # TODO: Send websocket to worker (Waiting for next with code XXX)
+    # Send websocket to customer (Is your turn, are you there?)
+    # Send websocket to worker (Waiting for next with code XXX)
+    LineChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(self).serializable_hash
   end
 end

@@ -86,10 +86,12 @@ class User < ApplicationRecord
 
   def start_break!
     update_columns(active: false)
+    services.each { |service| ServiceChannel.broadcast_to service, ActiveModelSerializers::SerializableResource.new(service).serializable_hash }
   end
 
   def finish_break!
     update_columns(active: true)
+    services.each { |service| ServiceChannel.broadcast_to service, ActiveModelSerializers::SerializableResource.new(service).serializable_hash }
   end
 
   # 1st step of queue handshake
