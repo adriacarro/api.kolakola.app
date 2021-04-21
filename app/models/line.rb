@@ -12,11 +12,13 @@ class Line < ApplicationRecord
 
   # Scope
   default_scope -> { order(position: :asc) }
+  scope :active, -> { where("status = :waiting OR status = :pending OR status = :serving", waiting: Line.statuses[:waiting], pending: Line.statuses[:pending], serving: Line.statuses[:serving]) }
   scope :in_process, -> { where("status = :pending OR status = :serving", pending: Line.statuses[:pending], serving: Line.statuses[:serving]) }
 
   # Callbacks
-  before_create :assign_unique_code
+  before_create :assign_unique_code, :notify_service_subscribers
   after_create :im_the_next_one?
+  after_save :notify_line_subscribers, if: -> { saved_change_to_position? }
 
   # Methods
   def pending!
@@ -52,8 +54,7 @@ class Line < ApplicationRecord
 
     position.blank? ? worker.call_to_next(service: service) : remove_from_list # If they weren't in the queue is because they were in handshake, otherwise, move the queue
 
-    # Notifiy service subscribers that queue has been updated
-    ServiceChannel.broadcast_to service, ActiveModelSerializers::SerializableResource.new(service).serializable_hash
+    notify_service_subscribers
   end
 
   private
@@ -71,11 +72,15 @@ class Line < ApplicationRecord
   end
 
   def start_handshake(worker:)
-    remove_from_list
     update_columns(worker_id: worker.id, queueing_time: Datetime.now.to_f - created_at.to_f)
-    
-    # Send websocket to customer (Is your turn, are you there?)
-    # Send websocket to worker (Waiting for next with code XXX)
+    remove_from_list
+  end
+
+  def notify_line_subscribers
     LineChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(self).serializable_hash
+  end
+
+  def notify_service_subscribers
+    ServiceChannel.broadcast_to service, ActiveModelSerializers::SerializableResource.new(service).serializable_hash
   end
 end

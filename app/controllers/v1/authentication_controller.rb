@@ -53,7 +53,9 @@ class V1::AuthenticationController < ApplicationController
     def login_json
       token = JsonWebToken.encode({ user: { id: @user.id, cookie: @user.cookie, role: @user.role, first_name: @user.first_name, last_name: @user.last_name, email: @user.email, place: @user&.place&.id } })
       time = Time.now + 24.hours.to_i
-      { token: token, exp: time.strftime('%m-%d-%Y %H:%M') }
+      json = { token: token, exp: time.strftime('%m-%d-%Y %H:%M') }
+      json.merge!(queues: ActiveModelSerializers::SerializableResource.new(@user.lines.active)) if @user.customer?
+      json
     end
 
     def signup_params
