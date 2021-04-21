@@ -23,6 +23,7 @@ class V1::ServicesController < ApplicationController
   # PUT /services/{id}
   def update
     @service.update!(service_params)
+    ServiceChannel.broadcast_to @line.service, ActiveModelSerializers::SerializableResource.new(@service).serializable_hash
     render json: @service, status: :ok
   end
 
@@ -34,7 +35,7 @@ class V1::ServicesController < ApplicationController
 
   # POST /services/{id}/enqueue
   def enqueue
-    @line = @service.lines.create!(customer_id: current_user.id)
+    @line = @service.lines.find_or_create_by!(customer_id: current_user.id, status: :waiting)
     render json: @line, status: :ok
   end
 

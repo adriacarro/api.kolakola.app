@@ -1,4 +1,4 @@
-class QueueChannel < ApplicationCable::Channel
+class ServiceChannel < ApplicationCable::Channel
   def subscribed
     service = Service.find(params[:service])
     stream_for service
