@@ -1,7 +1,7 @@
 class ServiceChannel < ApplicationCable::Channel
   def subscribed
-    service = Service.find(params[:service])
-    stream_for service
+    @service = Service.find(params[:service])
+    stream_for @service
   end
 
   def unsubscribed

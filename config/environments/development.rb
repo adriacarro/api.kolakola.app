@@ -1,6 +1,8 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
+  config.hosts.clear
+
   config.action_cable.allowed_request_origins = [/http:\/\/*/, /https:\/\/*/, /file:\/\/*/, 'file://', nil]
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -64,6 +66,5 @@ Rails.application.configure do
 
   # Uncomment if you wish to allow Action Cable access from any origin.
   config.action_cable.disable_request_forgery_protection = true
-  # config.action_cable.allowed_request_origins = ['http://url.com']
-  config.action_cable.url = 'ws://41ac115dea7c.ngrok.io/cable'
+  config.action_cable.url = 'ws://2717b833f670.ngrok.io/cable'
 end

@@ -18,6 +18,7 @@ class V1::AuthenticationController < ApplicationController
   def guest
     @user = params[:cookie].present? ? User.find_by!(cookie: params[:cookie]) : User.create!(role: :customer)
     cookies.signed[:user_id] = @user.id
+    puts "Auth cookies.signed[:user_id] > #{cookies.signed[:user_id]}"
     render json: login_json, status: :ok
   end
 
