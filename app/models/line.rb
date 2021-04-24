@@ -25,8 +25,8 @@ class Line < ApplicationRecord
     return if pending?
     super
 
-    # Send websocket to worker (also customer)
-    LineChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(self).serializable_hash
+    # Send websocket to worker
+    notify_worker_subscriber
   end
 
   def serving!
@@ -34,8 +34,8 @@ class Line < ApplicationRecord
 
     update_columns(status: :serving, pending_time: Datetime.now.to_f - (created_at + queueing_time.seconds).to_f)
 
-    # Send websocket to customer (Manuel is serving you!) (also customer)
-    LineChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(self).serializable_hash
+    # Send websocket to customer (Manuel is serving you!)
+    notify_line_subscribers
   end
 
   def served!
@@ -44,8 +44,9 @@ class Line < ApplicationRecord
     update_columns(status: :served, serving_time: Datetime.now.to_f - (created_at + queueing_time.seconds + serving_time.seconds).to_f)
     worker.call_to_next(service: service)
 
-    # Notifiy service subscribers that queue has been updated
-    ServiceChannel.broadcast_to service, ActiveModelSerializers::SerializableResource.new(service).serializable_hash
+    # Notifiy service subscribers that queue has been updated and customer that service has been finished
+    notify_line_subscribers
+    notify_service_subscribers
   end
 
   def abandoned!
@@ -78,6 +79,10 @@ class Line < ApplicationRecord
 
   def notify_line_subscribers
     LineChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(self).serializable_hash
+  end
+
+  def notify_worker_subscriber
+    WorkerChannel.broadcast_to worker, ActiveModelSerializers::SerializableResource.new(self).serializable_hash if worker.present?
   end
 
   def notify_service_subscribers
