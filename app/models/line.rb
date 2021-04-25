@@ -42,7 +42,7 @@ class Line < ApplicationRecord
     return if served?
 
     update_columns(status: :served, serving_time: Datetime.now.to_f - (created_at + queueing_time.seconds + serving_time.seconds).to_f)
-    worker.call_to_next(service: service)
+    worker.call_to_next
 
     # Notifiy service subscribers that line has been updated and customer that service has been finished
     broadcast
@@ -53,7 +53,7 @@ class Line < ApplicationRecord
     return if abandoned?
     super
 
-    position.blank? ? worker.call_to_next(service: service) : remove_from_list # If they weren't in the line is because they were in handshake, otherwise, move the line
+    position.blank? ? worker.call_to_next : remove_from_list # If they weren't in the line is because they were in handshake, otherwise, move the line
 
     service.broadcast
   end
@@ -69,7 +69,7 @@ class Line < ApplicationRecord
 
   def im_the_next_one?
     return unless position == 1 && service.free_workers?
-    service.free_worker&.call_to_next(service: service)
+    service.free_worker&.call_to_next
   end
 
   def start_handshake(worker:)

@@ -94,19 +94,16 @@ class User < ApplicationRecord
 
   def start_break!
     update_columns(active: false)
-    services.each(&:broadcast)
+    service.broadcast
   end
 
   def stop_break!
     update_columns(active: true)
-    services.each(&:broadcast)
+    service.broadcast
   end
 
   # 1st step of line handshake
-  def call_to_next(service:)
-    # Do nothing if not a worker or not attending this service
-    return unless worker? && services.exists?(id: service.id)
-
+  def call_to_next
     next_to_be_served = service.lines.waiting.first
     return if next_to_be_served.nil? # No more attendees
 
