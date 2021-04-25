@@ -23,7 +23,7 @@ class V1::ServicesController < ApplicationController
   # PUT /services/{id}
   def update
     @service.update!(service_params)
-    ServiceChannel.broadcast_to @service, ActiveModelSerializers::SerializableResource.new(@service).serializable_hash
+    @service.broadcast
     render json: @service, status: :ok
   end
 

@@ -1,32 +1,32 @@
 class V1::LinesController < ApplicationController
-  before_action :find_queue
+  before_action :find_line
 
-  # POST /queues/{id}/yield
+  # POST /lines/{id}/yield
   def yield
-    @queue.insert_at(@queue.position + params[:position].to_i)
-    render json: @queue, status: :ok
+    @line.insert_at(@line.position + params[:position].to_i)
+    render json: @line, status: :ok
   end
 
-  # PUT /queues/{id}
+  # PUT /lines/{id}
   def update
-    @queue.send("#{params[:status]}!")
-    render json: @queue, status: :ok
+    @line.send("#{params[:status]}!")
+    render json: @line, status: :ok
   end
 
   # DELETE /users/{id}
   def destroy
-    @queue.abandoned!
+    @line.abandoned!
     head :no_content
   end
 
   private
 
-  def find_queue
-    @queue = current_user.lines.find_by(id: params[:id])
-    authorize @queue
+  def find_line
+    @line = current_user.lines.find_by(id: params[:id])
+    authorize @line
   end
 
-  def queue_params
+  def line_params
     params.require(:line).permit(:status)
   end
 end

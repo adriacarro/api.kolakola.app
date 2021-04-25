@@ -1,7 +1,15 @@
 class LineChannel < ApplicationCable::Channel
   def subscribed
-    line = Line.find(params[:queue])
-    stream_for line
+    @line = Line.find(params[:line])
+    stream_for @line
+  end
+
+  def ready
+    @line.pending!
+  end
+
+  def abandon
+    @line.abandoned!
   end
 
   def unsubscribed

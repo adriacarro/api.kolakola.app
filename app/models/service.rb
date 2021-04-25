@@ -32,4 +32,8 @@ class Service < ApplicationRecord
   def free_workers?
     workers > in_process
   end
+
+  def broadcast
+    ServiceChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(self).serializable_hash
+  end
 end

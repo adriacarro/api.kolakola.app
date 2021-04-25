@@ -25,7 +25,7 @@ Rails.application.routes.draw do
     resources :services do
       post :enqueue, on: :member
     end
-    resources :queues, controller: :lines, only: [:update, :delete] do
+    resources :lines, only: [:update, :delete] do
       post :yield, on: :member
     end
   end

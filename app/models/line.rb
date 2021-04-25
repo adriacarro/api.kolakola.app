@@ -18,7 +18,7 @@ class Line < ApplicationRecord
   # Callbacks
   before_create :assign_unique_code, :notify_service_subscribers
   after_create :im_the_next_one?
-  after_save :notify_line_subscribers, if: -> { saved_change_to_position? }
+  after_save :broadcast, if: -> { saved_change_to_position? }
 
   # Methods
   def pending!
@@ -26,7 +26,7 @@ class Line < ApplicationRecord
     super
 
     # Send websocket to worker
-    notify_worker_subscriber
+    worker.broadcast(line: self)
   end
 
   def serving!
@@ -35,7 +35,7 @@ class Line < ApplicationRecord
     update_columns(status: :serving, pending_time: Datetime.now.to_f - (created_at + queueing_time.seconds).to_f)
 
     # Send websocket to customer (Manuel is serving you!)
-    notify_line_subscribers
+    broadcast
   end
 
   def served!
@@ -44,18 +44,18 @@ class Line < ApplicationRecord
     update_columns(status: :served, serving_time: Datetime.now.to_f - (created_at + queueing_time.seconds + serving_time.seconds).to_f)
     worker.call_to_next(service: service)
 
-    # Notifiy service subscribers that queue has been updated and customer that service has been finished
-    notify_line_subscribers
-    notify_service_subscribers
+    # Notifiy service subscribers that line has been updated and customer that service has been finished
+    broadcast
+    service.broadcast
   end
 
   def abandoned!
     return if abandoned?
     super
 
-    position.blank? ? worker.call_to_next(service: service) : remove_from_list # If they weren't in the queue is because they were in handshake, otherwise, move the queue
+    position.blank? ? worker.call_to_next(service: service) : remove_from_list # If they weren't in the line is because they were in handshake, otherwise, move the line
 
-    notify_service_subscribers
+    service.broadcast
   end
 
   private
@@ -77,15 +77,11 @@ class Line < ApplicationRecord
     remove_from_list
   end
 
-  def notify_line_subscribers
+  def broadcast
     LineChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(self).serializable_hash
   end
 
-  def notify_worker_subscriber
-    WorkerChannel.broadcast_to worker, ActiveModelSerializers::SerializableResource.new(self).serializable_hash if worker.present?
-  end
-
   def notify_service_subscribers
-    ServiceChannel.broadcast_to service, ActiveModelSerializers::SerializableResource.new(service).serializable_hash
+    service.broadcast
   end
 end

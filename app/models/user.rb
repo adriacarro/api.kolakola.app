@@ -70,6 +70,13 @@ class User < ApplicationRecord
     { user: { role: role } }
   end
 
+  def login_json
+    main_json = { id: id, first_name: first_name, last_name: last_name, email: email }
+    main_json.merge!(role: role, place: place&.id) unless customer?
+    main_json.merge!(cookie: cookie, lines: ActiveModelSerializers::SerializableResource.new(lines.active)) if customer?
+    main_json
+  end
+
   def invitation
     return 'accepted' if invite_accepted
     'sent'
@@ -87,15 +94,15 @@ class User < ApplicationRecord
 
   def start_break!
     update_columns(active: false)
-    services.each { |service| ServiceChannel.broadcast_to service, ActiveModelSerializers::SerializableResource.new(service).serializable_hash }
+    services.each(&:broadcast)
   end
 
   def finish_break!
     update_columns(active: true)
-    services.each { |service| ServiceChannel.broadcast_to service, ActiveModelSerializers::SerializableResource.new(service).serializable_hash }
+    services.each(&:broadcast)
   end
 
-  # 1st step of queue handshake
+  # 1st step of line handshake
   def call_to_next(service:)
     # Do nothing if not a worker or not attending this service
     return unless worker? && services.exists?(id: service.id)
@@ -103,8 +110,12 @@ class User < ApplicationRecord
     next_to_be_served = service.lines.waiting.first
     return if next_to_be_served.nil? # No more attendees
 
-    # Start queue handshake
+    # Start line handshake
     next_to_be_served.start_handshake(worker: self)
+  end
+
+  def broadcast(line:)
+    WorkerChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(line).serializable_hash
   end
 
   private

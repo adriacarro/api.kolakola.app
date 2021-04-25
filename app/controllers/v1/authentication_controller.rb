@@ -18,7 +18,6 @@ class V1::AuthenticationController < ApplicationController
   def guest
     @user = params[:cookie].present? ? User.find_by!(cookie: params[:cookie]) : User.create!(role: :customer)
     cookies.signed[:user_id] = @user.id
-    puts "Auth cookies.signed[:user_id] > #{cookies.signed[:user_id]}"
     render json: login_json, status: :ok
   end
 
@@ -52,11 +51,9 @@ class V1::AuthenticationController < ApplicationController
     end
 
     def login_json
-      token = JsonWebToken.encode({ user: { id: @user.id, cookie: @user.cookie, role: @user.role, first_name: @user.first_name, last_name: @user.last_name, email: @user.email, place: @user&.place&.id } })
+      token = JsonWebToken.encode({ user: @user.login_json })
       time = Time.now + 24.hours.to_i
-      json = { token: token, exp: time.strftime('%m-%d-%Y %H:%M') }
-      json.merge!(queues: ActiveModelSerializers::SerializableResource.new(@user.lines.active)) if @user.customer?
-      json
+      { token: token, exp: time.strftime('%m-%d-%Y %H:%M') }
     end
 
     def signup_params
