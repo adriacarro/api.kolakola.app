@@ -84,6 +84,7 @@ class User < ApplicationRecord
   def start_break!
     update_columns(active: false)
     service.broadcast
+    call_to_next
   end
 
   def stop_break!
