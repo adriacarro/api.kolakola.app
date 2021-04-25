@@ -51,7 +51,7 @@ class V1::AuthenticationController < ApplicationController
     end
 
     def login_json
-      token = JsonWebToken.encode({ user: @user.login_json })
+      token = JsonWebToken.encode(ActiveModelSerializers::SerializableResource.new(@user, adapter: :json, root: :user).serializable_hash)
       time = Time.now + 24.hours.to_i
       { token: token, exp: time.strftime('%m-%d-%Y %H:%M') }
     end

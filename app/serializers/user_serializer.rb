@@ -1,13 +1,18 @@
 # frozen_string_literal: true
 
 class UserSerializer < ActiveModel::Serializer
-  attributes :id, :name, :role, :email, :invite_accepted, :invited_at, :created_at
+  attributes :id, :name, :email, :created_at
+  attribute :invite_accepted, if: :is_worker?
+  attribute :invited_at, if: :is_worker?
+  belongs_to :place, unless: :is_customer?
+  attribute :cookie, if: :is_customer?
+  has_many :lines, if: :is_customer?
 
-  def invited_at
-    object.invited_at
+  def is_worker?
+    object.worker?
   end
 
-  def created_at
-    object.created_at
+  def is_customer?
+    object.customer?
   end
 end

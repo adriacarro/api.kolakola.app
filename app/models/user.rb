@@ -62,19 +62,8 @@ class User < ApplicationRecord
 
   def invite!
     raise Error::AuthorizationError.new(403, :forbidden, I18n.t('activerecord.errors.messages.invitation_already_accepted')) if invite_accepted
-    update(invite_token: JsonWebToken.encode(invite_json, 1.year.from_now), invited_at: Time.now, invite_accepted: false)
+    update(invite_token: JsonWebToken.encode(ActiveModelSerializers::SerializableResource.new(self, adapter: :json, root: :user).serializable_hash, 1.year.from_now), invited_at: Time.now, invite_accepted: false)
     AuthMailer.invite(self).deliver_later
-  end
-
-  def invite_json
-    { user: { role: role } }
-  end
-
-  def login_json
-    main_json = { id: id, first_name: first_name, last_name: last_name, email: email }
-    main_json.merge!(role: role, place: place&.id) unless customer?
-    main_json.merge!(cookie: cookie, lines: ActiveModelSerializers::SerializableResource.new(lines.active).serializable_hash) if customer?
-    main_json
   end
 
   def invitation

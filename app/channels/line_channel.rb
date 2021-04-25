@@ -13,7 +13,7 @@ class LineChannel < ApplicationCable::Channel
   end
 
   def yield(data)
-    @line.insert_at(@line.position + data[:position].to_i)
+    @line.insert_at(@line.position + data['position'].to_i)
   end
 
   def unsubscribed
