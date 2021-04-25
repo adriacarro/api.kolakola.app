@@ -37,7 +37,7 @@ class V1::UsersController < ApplicationController
 
   # POST/DESTROY /users/{id}/break
   def break
-    @user.send("#{request.post? ? 'start' : 'finish'}_break!")
+    @user.send("#{request.post? ? 'start' : 'stop'}_break!")
     head :no_content
   end
 

@@ -19,6 +19,10 @@ class WorkerChannel < ApplicationCable::Channel
     @user.lines.pending.find_by(id: data[:id]).served!
   end
 
+  def miss(data)
+    @user.lines.pending.find_by(id: data[:id]).abandoned!
+  end
+
   def unsubscribed
     # Any cleanup needed when channel is unsubscribed
   end

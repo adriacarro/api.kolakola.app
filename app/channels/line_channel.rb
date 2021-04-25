@@ -12,6 +12,10 @@ class LineChannel < ApplicationCable::Channel
     @line.abandoned!
   end
 
+  def yield(data)
+    @line.insert_at(@line.position + data[:position].to_i)
+  end
+
   def unsubscribed
     # Any cleanup needed when channel is unsubscribed
   end

@@ -97,7 +97,7 @@ class User < ApplicationRecord
     services.each(&:broadcast)
   end
 
-  def finish_break!
+  def stop_break!
     update_columns(active: true)
     services.each(&:broadcast)
   end
