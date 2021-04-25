@@ -84,12 +84,12 @@ class User < ApplicationRecord
   def start_break!
     update_columns(active: false)
     service.broadcast
-    call_to_next
   end
 
   def stop_break!
     update_columns(active: true)
     service.broadcast
+    call_to_next
   end
 
   # 1st step of line handshake

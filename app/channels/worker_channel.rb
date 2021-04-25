@@ -4,8 +4,12 @@ class WorkerChannel < ApplicationCable::Channel
     stream_for @user
   end
 
-  def break(data)
-    @user.send("#{data['action']}_break!")
+  def start
+    @user.stop_break!
+  end
+
+  def stop
+    @user.start_break!
   end
 
   def ready(data)
