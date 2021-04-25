@@ -73,7 +73,7 @@ class User < ApplicationRecord
   def login_json
     main_json = { id: id, first_name: first_name, last_name: last_name, email: email }
     main_json.merge!(role: role, place: place&.id) unless customer?
-    main_json.merge!(cookie: cookie, lines: ActiveModelSerializers::SerializableResource.new(lines.active)) if customer?
+    main_json.merge!(cookie: cookie, lines: ActiveModelSerializers::SerializableResource.new(lines.active).serializable_hash) if customer?
     main_json
   end
 
