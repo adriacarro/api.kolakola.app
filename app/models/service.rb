@@ -14,7 +14,7 @@ class Service < ApplicationRecord
 
   # Methods
   def free_worker
-    users.active.where.not(id: lines.in_process.pluck(:worker_id)).shuffle.first&.id
+    users.active.where.not(id: lines.in_process.pluck(:worker_id)).shuffle.first
   end
 
   def in_process
