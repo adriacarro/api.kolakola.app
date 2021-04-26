@@ -58,6 +58,15 @@ class Line < ApplicationRecord
     service.broadcast
   end
 
+  def start_handshake(worker:)
+    update_columns(worker_id: worker.id, queueing_time: Datetime.now.to_f - created_at.to_f)
+    remove_from_list
+  end
+
+  def broadcast
+    LineChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(self).serializable_hash
+  end
+
   private
 
   def assign_unique_code
@@ -70,15 +79,6 @@ class Line < ApplicationRecord
   def im_the_next_one?
     return unless position == 1 && service.free_workers?
     service.free_worker&.call_to_next
-  end
-
-  def start_handshake(worker:)
-    update_columns(worker_id: worker.id, queueing_time: Datetime.now.to_f - created_at.to_f)
-    remove_from_list
-  end
-
-  def broadcast
-    LineChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(self).serializable_hash
   end
 
   def notify_service_subscribers
