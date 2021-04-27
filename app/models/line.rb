@@ -32,7 +32,7 @@ class Line < ApplicationRecord
   def serving!
     return if serving?
 
-    update_columns(status: :serving, pending_time: Datetime.now.to_f - (created_at + queueing_time.seconds).to_f)
+    update_columns(status: :serving, pending_time: DateTime.now.to_f - (created_at + queueing_time.seconds).to_f)
 
     # Send websocket to customer (Manuel is serving you!)
     broadcast
@@ -41,7 +41,7 @@ class Line < ApplicationRecord
   def served!
     return if served?
 
-    update_columns(status: :served, serving_time: Datetime.now.to_f - (created_at + queueing_time.seconds + serving_time.seconds).to_f)
+    update_columns(status: :served, serving_time: DateTime.now.to_f - (created_at + queueing_time.seconds + serving_time.seconds).to_f)
     worker.call_to_next
 
     # Notifiy service subscribers that line has been updated and customer that service has been finished
@@ -59,7 +59,7 @@ class Line < ApplicationRecord
   end
 
   def start_handshake(worker:)
-    update_columns(worker_id: worker.id, queueing_time: Datetime.now.to_f - created_at.to_f)
+    update_columns(worker_id: worker.id, queueing_time: DateTime.now.to_f - created_at.to_f)
     remove_from_list
   end
 
