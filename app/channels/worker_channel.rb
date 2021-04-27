@@ -5,7 +5,7 @@ class WorkerChannel < ApplicationCable::Channel
   end
 
   def check
-    @user.lines.each{ |line| @user.broadcast(line: line) }
+    @user.attending_lines.each{ |line| @user.broadcast(line: line) }
   end
 
   def start
@@ -17,15 +17,15 @@ class WorkerChannel < ApplicationCable::Channel
   end
 
   def ready(data)
-    @user.lines.pending.find_by(id: data['id']).serving!
+    @user.attending_lines.pending.find_by(id: data['id']).serving!
   end
 
   def finish(data)
-    @user.lines.pending.find_by(id: data['id']).served!
+    @user.attending_lines.serving.find_by(id: data['id']).served!
   end
 
   def miss(data)
-    @user.lines.pending.find_by(id: data['id']).abandoned!
+    @user.attending_lines.pending.find_by(id: data['id']).abandoned!
   end
 
   def unsubscribed
