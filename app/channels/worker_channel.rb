@@ -4,6 +4,10 @@ class WorkerChannel < ApplicationCable::Channel
     stream_for @user
   end
 
+  def check
+    @user.lines.each{ |line| @user.broadcast(line: line) }
+  end
+
   def start
     @user.stop_break!
   end

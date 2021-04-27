@@ -4,6 +4,10 @@ class LineChannel < ApplicationCable::Channel
     stream_for @line
   end
 
+  def check
+    @line.broadcast
+  end
+
   def ready
     @line.pending!
   end
