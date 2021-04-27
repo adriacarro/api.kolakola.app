@@ -11,7 +11,9 @@ class UserSerializer < ActiveModel::Serializer
   belongs_to :service, if: :is_worker?
   
   attribute :cookie, if: :is_customer?
-  has_many :lines, if: :is_customer?
+  has_many :lines, if: :is_customer? do
+    object.lines.active
+  end
 
   def line
     object.lines.active.any? ? ActiveModelSerializers::SerializableResource.new(object.lines.active.first).serializable_hash : nil
