@@ -26,7 +26,7 @@ class Service < ApplicationRecord
   end
 
   def workers
-    users.active.count
+    users.worker.active.count
   end
 
   def free_workers?

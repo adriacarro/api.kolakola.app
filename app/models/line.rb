@@ -5,7 +5,7 @@ class Line < ApplicationRecord
   belongs_to :worker, class_name: "User", foreign_key: "worker_id", optional: true
 
   # Extensions
-  acts_as_list scope: [:service_id, :status]
+  acts_as_list scope: :service
 
   # Attributes
   enum status: %i[waiting pending serving served abandoned]
