@@ -2,6 +2,8 @@ class WorkerChannel < ApplicationCable::Channel
   def subscribed
     @user = User.worker.find(params[:user])
     stream_for @user
+    start
+    check
   end
 
   def check
