@@ -5,18 +5,22 @@ class LineChannel < ApplicationCable::Channel
   end
 
   def check
+    @line.reload
     @line.broadcast
   end
 
   def ready
+    @line.reload
     @line.pending!
   end
 
   def abandon
+    @line.reload
     @line.abandoned!
   end
 
   def yield(data)
+    @line.reload
     @line.insert_at(@line.position + data['position'].to_i)
   end
 
