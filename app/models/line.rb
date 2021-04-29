@@ -13,7 +13,7 @@ class Line < ApplicationRecord
   # Scope
   default_scope -> { order(position: :asc) }
   scope :active, -> { where("status = :waiting OR status = :pending OR status = :serving", waiting: Line.statuses[:waiting], pending: Line.statuses[:pending], serving: Line.statuses[:serving]) }
-  scope :in_process, -> { where("status = :pending OR status = :serving", pending: Line.statuses[:pending], serving: Line.statuses[:serving]) }
+  scope :in_process, -> { where("(status = :waiting AND worker_id IS NOT NULL) OR status = :pending OR status = :serving", waiting: Line.statuses[:waiting], pending: Line.statuses[:pending], serving: Line.statuses[:serving]) }
 
   # Callbacks
   before_create :assign_unique_code, :notify_service_subscribers
@@ -25,8 +25,9 @@ class Line < ApplicationRecord
     return if pending?
     super
 
-    # Send websocket to worker
+    # Send websocket to worker and customer
     worker.broadcast(line: self)
+    broadcast
   end
 
   def serving!
@@ -34,28 +35,34 @@ class Line < ApplicationRecord
 
     update_columns(status: :serving, pending_time: DateTime.now.to_f - (created_at + queueing_time.seconds).to_f)
 
-    # Send websocket to customer (Manuel is serving you!)
+    # Send websocket to customer (Manuel is serving you!) and worker
     broadcast
+    worker.broadcast(line: self)
   end
 
   def served!
     return if served?
 
     update_columns(status: :served, serving_time: DateTime.now.to_f - (created_at + queueing_time.seconds + serving_time.seconds).to_f)
-    worker.call_to_next
 
     # Notifiy service subscribers that line has been updated and customer that service has been finished
     broadcast
     service.broadcast
+
+    # Go to next (if there are)
+    worker.call_to_next
   end
 
   def abandoned!
     return if abandoned?
     super
 
-    position.blank? ? worker.call_to_next : remove_from_list # If they weren't in the line is because they were in handshake, otherwise, move the line
-
+    # Notify service that queue has been modified and also customer and worker (if exists) that queue is no longer valid
     service.broadcast
+    broadcast
+    worker&.broadcast(line: self)
+
+    position.blank? ? worker.call_to_next : remove_from_list # If they weren't in the line is because they were in handshake, otherwise, move the line
   end
 
   def start_handshake(worker:)
