@@ -47,6 +47,7 @@ class Line < ApplicationRecord
 
     # Notifiy service subscribers that line has been updated and customer that service has been finished
     broadcast
+    worker.broadcast(line: self)
     service.broadcast
 
     # Go to next (if there are)
