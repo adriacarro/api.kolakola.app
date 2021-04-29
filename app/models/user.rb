@@ -90,7 +90,7 @@ class User < ApplicationRecord
   def stop_break!
     update_columns(active: true)
     service.broadcast
-    call_to_next
+    call_to_next if attending_lines.in_process.none?
   end
 
   # 1st step of line handshake
