@@ -69,6 +69,8 @@ class Line < ApplicationRecord
   def start_handshake(worker:)
     update_columns(worker_id: worker.id, queueing_time: DateTime.now.to_f - created_at.to_f)
     remove_from_list
+    # Give 20 seconds and if status is stil waiting > abandoned
+    AbandonLineJob.set(wait: 20.seconds).perform_later(self)
   end
 
   def broadcast
