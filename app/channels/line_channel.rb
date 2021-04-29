@@ -2,7 +2,6 @@ class LineChannel < ApplicationCable::Channel
   def subscribed
     @line = Line.find(params[:line])
     stream_for @line
-    check
   end
 
   def check
