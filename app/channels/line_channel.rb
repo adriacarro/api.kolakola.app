@@ -10,9 +10,6 @@ class LineChannel < ApplicationCable::Channel
 
   def ready
     @line.pending!
-    # Send websocket to worker and customer
-    @line.worker.broadcast(line: @line)
-    @line.broadcast
   end
 
   def abandon

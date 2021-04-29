@@ -25,7 +25,9 @@ class Line < ApplicationRecord
     return if pending?
     super
 
-    
+    # Send websocket to worker and customer
+    worker.broadcast(line: self)
+    broadcast
   end
 
   def serving!
