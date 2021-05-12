@@ -3,9 +3,10 @@
 class User < ApplicationRecord
   #  Relations
   belongs_to :place, optional: true
-  belongs_to :service, optional: true
-  has_many :lines, class_name: "Line", foreign_key: "customer_id"
-  has_many :attending_lines, class_name: "Line", foreign_key: "worker_id"
+  has_many :user_services, dependent: :destroy
+  has_many :services, through: :user_services
+  has_many :lines, class_name: "Line", foreign_key: "customer_id", dependent: :nullify
+  has_many :attending_lines, class_name: "Line", foreign_key: "worker_id", dependent: :nullify
 
   # Validations
   validates :email, presence: true, uniqueness: { scope: :place, case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }, unless: -> { customer? }
@@ -84,18 +85,18 @@ class User < ApplicationRecord
 
   def start_break!
     update_columns(active: false)
-    service.broadcast
+    services.each(&:broadcast)
   end
 
   def stop_break!
     update_columns(active: true)
-    service.broadcast
+    services.each(&:broadcast)
     call_to_next if attending_lines.in_process.none?
   end
 
   # 1st step of line handshake
   def call_to_next
-    next_to_be_served = service.lines.waiting.first
+    next_to_be_served = services.map{ |service| service.lines.waiting.to_a }.flatten.shuffle.first
     return if next_to_be_served.nil? # No more attendees
 
     # Start line handshake

@@ -10,13 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_04_19_203804) do
+ActiveRecord::Schema.define(version: 2021_05_12_204427) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
 
-  create_table "addresses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "addresses", id: :uuid, default: -> { "public.gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.string "code"
     t.string "street_1"
@@ -29,13 +29,13 @@ ActiveRecord::Schema.define(version: 2021_04_19_203804) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "categories", id: :uuid, default: -> { "public.gen_random_uuid()" }, force: :cascade do |t|
     t.json "name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "lines", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "lines", id: :uuid, default: -> { "public.gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "service_id"
     t.uuid "customer_id"
     t.uuid "worker_id"
@@ -52,7 +52,7 @@ ActiveRecord::Schema.define(version: 2021_04_19_203804) do
     t.index ["worker_id"], name: "index_lines_on_worker_id"
   end
 
-  create_table "places", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "places", id: :uuid, default: -> { "public.gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.uuid "category_id", null: false
     t.uuid "billing_address_id", null: false
@@ -64,7 +64,7 @@ ActiveRecord::Schema.define(version: 2021_04_19_203804) do
     t.index ["category_id"], name: "index_places_on_category_id"
   end
 
-  create_table "promotions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "promotions", id: :uuid, default: -> { "public.gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "place_id", null: false
     t.json "title"
     t.json "message"
@@ -74,7 +74,7 @@ ActiveRecord::Schema.define(version: 2021_04_19_203804) do
     t.index ["place_id"], name: "index_promotions_on_place_id"
   end
 
-  create_table "services", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "services", id: :uuid, default: -> { "public.gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "place_id", null: false
     t.json "name"
     t.integer "avg_serving_time", default: 0
@@ -83,7 +83,16 @@ ActiveRecord::Schema.define(version: 2021_04_19_203804) do
     t.index ["place_id"], name: "index_services_on_place_id"
   end
 
-  create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "user_services", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "service_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["service_id"], name: "index_user_services_on_service_id"
+    t.index ["user_id"], name: "index_user_services_on_user_id"
+  end
+
+  create_table "users", id: :uuid, default: -> { "public.gen_random_uuid()" }, force: :cascade do |t|
     t.integer "role", default: 0
     t.string "cookie"
     t.string "first_name"
@@ -93,7 +102,6 @@ ActiveRecord::Schema.define(version: 2021_04_19_203804) do
     t.string "phone"
     t.boolean "active", default: true
     t.uuid "place_id"
-    t.uuid "service_id"
     t.string "password_digest"
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
@@ -110,7 +118,6 @@ ActiveRecord::Schema.define(version: 2021_04_19_203804) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["place_id"], name: "index_users_on_place_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
-    t.index ["service_id"], name: "index_users_on_service_id"
   end
 
   add_foreign_key "lines", "services"
@@ -121,6 +128,7 @@ ActiveRecord::Schema.define(version: 2021_04_19_203804) do
   add_foreign_key "places", "categories"
   add_foreign_key "promotions", "places"
   add_foreign_key "services", "places"
+  add_foreign_key "user_services", "services"
+  add_foreign_key "user_services", "users"
   add_foreign_key "users", "places"
-  add_foreign_key "users", "services"
 end

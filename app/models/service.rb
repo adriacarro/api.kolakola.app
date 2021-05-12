@@ -3,7 +3,8 @@ class Service < ApplicationRecord
 
   # Relations
   belongs_to :place
-  has_many :users, -> { order(first_name: :asc) }, dependent: :destroy
+  has_many :user_services, dependent: :destroy
+  has_many :users, -> { order(first_name: :asc) }, through: :user_services
   has_many :lines, dependent: :nullify
 
   # Extensions
@@ -26,7 +27,7 @@ class Service < ApplicationRecord
   end
 
   def workers
-    users.worker.active.count
+    users.active.count
   end
 
   def free_workers?
