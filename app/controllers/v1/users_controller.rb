@@ -35,12 +35,6 @@ class V1::UsersController < ApplicationController
     head :no_content
   end
 
-  # POST/DESTROY /users/{id}/break
-  def break
-    @user.send("#{request.post? ? 'start' : 'stop'}_break!")
-    head :no_content
-  end
-
   # DELETE /users/{id}
   def destroy
     @user.destroy
@@ -69,6 +63,6 @@ class V1::UsersController < ApplicationController
     end
 
     def user_params
-      params.require(:user).permit(:first_name, :last_name, :email)
+      params.require(:user).permit(:first_name, :last_name, :email, :notification_type)
     end
 end
