@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  loggable: one
+  loggable_type: Loggable
+  user: one
+  action: 1
+  attributes: 
+
+two:
+  loggable: two
+  loggable_type: Loggable
+  user: two
+  action: 1
+  attributes: 
