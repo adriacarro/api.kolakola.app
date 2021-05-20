@@ -18,20 +18,20 @@ class V1::UsersController < ApplicationController
   # POST /users
   def create
     authorize User
-    @user = User.create!(user_params.merge({place_id: current_user.place.id, role: :worker}))
+    @user = User.create!(user_params.merge(place_id: current_user.place.id, role: :worker, current_user_id: current_user.id))
     render json: @user, status: :ok
   end
 
   # PUT /users/{id}
   def update
-    @user.update!(user_params)
+    @user.update!(user_params.merge(current_user_id: current_user.id))
     @user.invite! if params[:send_invite].present? && params[:send_invite]
     render json: @user, status: :ok
   end
 
   # POST /users/{id}/invite
   def invite
-    @user.invite!
+    @user.invite!(current_user_id: current_user.id)
     head :no_content
   end
 
@@ -43,6 +43,7 @@ class V1::UsersController < ApplicationController
 
   # DELETE /users/{id}/logout
   def logout
+    @user.logout!
     cookies.delete :user_id
     head :no_content
   end

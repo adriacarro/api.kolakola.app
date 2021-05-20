@@ -1,4 +1,8 @@
+# frozen_string_literal: true
+
 class Place < ApplicationRecord
+  include Loggable
+
   # Relations
   belongs_to :category
   belongs_to :billing_address, class_name: "Address", foreign_key: "billing_address_id"

@@ -16,13 +16,13 @@ class V1::ServicesController < ApplicationController
 
   # POST /services
   def create
-    @service = Service.create!(service_params.merge({place_id: current_user.place.id}))
+    @service = Service.create!(service_params.merge(place_id: current_user.place.id, current_user_id: current_user.id))
     render json: @service, status: :ok
   end
 
   # PUT /services/{id}
   def update
-    @service.update!(service_params)
+    @service.update!(service_params.merge(current_user_id: current_user.id))
     @service.broadcast
     render json: @service, status: :ok
   end
@@ -35,7 +35,7 @@ class V1::ServicesController < ApplicationController
 
   # POST /services/{id}/enqueue
   def enqueue
-    @line = @service.lines.where(customer_id: current_user.id).active.first || @service.lines.create!(customer_id: current_user.id, status: :waiting)
+    @line = @service.lines.where(customer_id: current_user.id).active.first || @service.lines.create!(customer_id: current_user.id, status: :waiting, current_user_id: current_user.id)
     render json: @line, status: :ok
   end
 

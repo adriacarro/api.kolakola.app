@@ -10,7 +10,7 @@ class V1::PlacesController < ApplicationController
 
   # PUT /places/{id}
   def update
-    @place.update!(place_params)
+    @place.update!(place_params.merge(current_user_id: current_user.id))
     render json: @place, user: current_user, status: :ok
   end
 

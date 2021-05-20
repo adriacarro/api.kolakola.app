@@ -8,7 +8,7 @@ class UserSerializer < ActiveModel::Serializer
   attribute :invited_at, if: :is_worker?
 
   attribute :place, unless: :is_customer?
-  belongs_to :service, if: :is_worker?
+  has_many :services, if: :is_worker?
   
   attribute :cookie, if: :is_customer?
   has_many :lines, if: :is_customer? do

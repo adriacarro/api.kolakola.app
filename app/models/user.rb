@@ -1,14 +1,15 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
+  include Loggable
+  
   #  Relations
   belongs_to :place, optional: true
   has_many :user_services, dependent: :destroy
   has_many :services, through: :user_services
   has_many :lines, class_name: "Line", foreign_key: "customer_id", dependent: :nullify
   has_many :attending_lines, class_name: "Line", foreign_key: "worker_id", dependent: :nullify
-  has_many :user_logs, class_name: 'Log'
-  has_many :logs, as: :loggable
+  has_many :user_logs, class_name: 'Log', dependent: :destroy
 
   # Validations
   validates :email, presence: true, uniqueness: { scope: :place, case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }, unless: -> { customer? }
@@ -64,10 +65,15 @@ class User < ApplicationRecord
     !Time.now.between?(reset_password_sent_at, reset_password_sent_at + RESET_PASSWORD_TIME.minutes)
   end
 
-  def invite!
+  def invite!(current_user_id: nil)
     raise Error::AuthorizationError.new(403, :forbidden, I18n.t('activerecord.errors.messages.invitation_already_accepted')) if invite_accepted
-    update(invite_token: JsonWebToken.encode(ActiveModelSerializers::SerializableResource.new(self, adapter: :json, root: :user).serializable_hash, 1.year.from_now), invited_at: Time.now, invite_accepted: false)
+    update(invite_token: JsonWebToken.encode(ActiveModelSerializers::SerializableResource.new(self, adapter: :json, root: :user).serializable_hash, 1.year.from_now), invited_at: Time.now, invite_accepted: false, current_user_id: current_user_id)
     AuthMailer.invite(self).deliver_later
+  end
+
+  def logout!
+    start_break! if worker?
+    update(log_out_at: Time.now, current_user_id: id)
   end
 
   def invitation

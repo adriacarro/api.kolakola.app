@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 class Service < ApplicationRecord
   extend Mobility
+  include Loggable
 
   # Relations
   belongs_to :place

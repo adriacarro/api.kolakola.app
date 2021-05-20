@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_12_204427) do
+ActiveRecord::Schema.define(version: 2021_05_20_204422) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -50,6 +50,18 @@ ActiveRecord::Schema.define(version: 2021_05_12_204427) do
     t.index ["customer_id"], name: "index_lines_on_customer_id"
     t.index ["service_id"], name: "index_lines_on_service_id"
     t.index ["worker_id"], name: "index_lines_on_worker_id"
+  end
+
+  create_table "logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "loggable_type", null: false
+    t.uuid "loggable_id", null: false
+    t.uuid "user_id", null: false
+    t.integer "action", default: 0
+    t.jsonb "log_changes"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["loggable_type", "loggable_id"], name: "index_logs_on_loggable"
+    t.index ["user_id"], name: "index_logs_on_user_id"
   end
 
   create_table "places", id: :uuid, default: -> { "public.gen_random_uuid()" }, force: :cascade do |t|
@@ -115,6 +127,7 @@ ActiveRecord::Schema.define(version: 2021_05_12_204427) do
     t.datetime "invite_accepted_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.datetime "log_out_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["place_id"], name: "index_users_on_place_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -123,6 +136,7 @@ ActiveRecord::Schema.define(version: 2021_05_12_204427) do
   add_foreign_key "lines", "services"
   add_foreign_key "lines", "users", column: "customer_id"
   add_foreign_key "lines", "users", column: "worker_id"
+  add_foreign_key "logs", "users"
   add_foreign_key "places", "addresses"
   add_foreign_key "places", "addresses", column: "billing_address_id"
   add_foreign_key "places", "categories"

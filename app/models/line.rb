@@ -1,4 +1,8 @@
+# frozen_string_literal: true
+
 class Line < ApplicationRecord
+  include Loggable
+
   # Relations
   belongs_to :service
   belongs_to :customer, class_name: "User", foreign_key: "customer_id", optional: true
@@ -23,7 +27,7 @@ class Line < ApplicationRecord
   # Methods
   def pending!
     return if pending?
-    super
+    update(status: :pending, current_user_id: customer.id)
 
     # Send websocket to worker and customer
     worker.broadcast(line: self)
@@ -33,7 +37,7 @@ class Line < ApplicationRecord
   def serving!
     return if serving?
 
-    update_columns(status: :serving, pending_time: DateTime.now.to_f - (created_at + queueing_time.seconds).to_f)
+    update(status: :serving, pending_time: DateTime.now.to_f - (created_at + queueing_time.seconds).to_f, current_user_id: worker.id)
 
     # Send websocket to customer (Manuel is serving you!) and worker
     broadcast
@@ -43,7 +47,7 @@ class Line < ApplicationRecord
   def served!
     return if served?
 
-    update_columns(status: :served, serving_time: DateTime.now.to_f - (created_at + queueing_time.seconds + serving_time.seconds).to_f)
+    update(status: :served, serving_time: DateTime.now.to_f - (created_at + queueing_time.seconds + serving_time.seconds).to_f, current_user_id: worker.id)
 
     # Notifiy service subscribers that line has been updated and customer that service has been finished
     broadcast
@@ -56,7 +60,7 @@ class Line < ApplicationRecord
 
   def abandoned!
     return if abandoned?
-    super
+    update(status: :abandoned, current_user_id: customer.id)
 
     # Notify service that queue has been modified and also customer and worker (if exists) that queue is no longer valid
     service.broadcast
