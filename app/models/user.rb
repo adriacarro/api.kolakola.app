@@ -10,6 +10,7 @@ class User < ApplicationRecord
   has_many :lines, class_name: "Line", foreign_key: "customer_id", dependent: :nullify
   has_many :attending_lines, class_name: "Line", foreign_key: "worker_id", dependent: :nullify
   has_many :user_logs, class_name: 'Log', dependent: :destroy
+  has_many :ratings, dependent: :nullify
 
   # Validations
   validates :email, presence: true, uniqueness: { scope: :place, case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }, unless: -> { customer? }

@@ -23,5 +23,6 @@ Rails.application.routes.draw do
     resources :services do
       post :enqueue, on: :member
     end
+    resources :ratings, only: [:create]
   end
 end
