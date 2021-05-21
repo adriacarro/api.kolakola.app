@@ -17,6 +17,7 @@ Rails.application.routes.draw do
     resources :users do
       delete :logout, on: :member
       post :invite, on: :member
+      resources :services, only: [:create, :destroy], controller: 'user_services'
     end
 
     resources :places, only: [:show, :update]
