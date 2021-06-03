@@ -27,6 +27,7 @@ module ApiKolakolaApp
     config.autoload_paths += %W[
       #{Rails.root}/lib
       #{Rails.root}/config/routes
+      #{Rails.root}/app/services
     ]
 
     config.time_zone = 'Madrid'

@@ -64,6 +64,6 @@ class V1::UsersController < ApplicationController
     end
 
     def user_params
-      params.require(:user).permit(:first_name, :last_name, :email, :notification_type)
+      params.require(:user).permit(:first_name, :last_name, :email, :notification_type, :phone)
     end
 end
