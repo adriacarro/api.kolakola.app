@@ -22,7 +22,7 @@ class Line < ApplicationRecord
   # Callbacks
   before_create :assign_unique_code, :notify_service_subscribers
   after_create :im_the_next_one?
-  after_save :broadcast, if: -> { saved_change_to_position? }
+  after_save :position_updated, if: -> { saved_change_to_position? }
 
   # Methods
   def pending!
@@ -75,6 +75,20 @@ class Line < ApplicationRecord
     remove_from_list
     # Give 20 seconds and if status is stil waiting > abandoned
     AbandonLineJob.set(wait: 22.seconds).perform_later(self)
+  end
+
+  def position_updated
+    notify_customer
+    broadcast
+  end
+
+  def notify_customer
+    send_sms if customer.sms? && customer.phone.present? && (position.nil? || position == 2)
+  end
+
+  def send_sms
+    message = position.nil? ? I18n.t('lines.notify.ready', service: service.name, place: service.place.name, code: code) : I18n.t('lines.notify.almost', service: service.name, place: service.place.name, **ActiveSupport::Duration.build(service.avg_serving_time * position).parts)
+    TwilioTextMessenger.new(customer.phone, message).call
   end
 
   def broadcast

@@ -1,0 +1,5 @@
+es:
+  lines:
+    notify:
+      ready: Ya es tu turno para %{service} en %{place} con el código %{code}
+      almost: Casi es tu turno para %{service} en %{place}. Te queda aproximadamente %{minutes} minutos y %{seconds} segundos

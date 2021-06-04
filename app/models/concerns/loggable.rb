@@ -5,7 +5,7 @@ module Loggable
     # Attribute to track who performs each action
     attr_accessor :current_user_id
 
-    # Relations
+    # Relatio{action: action, user_id: current_user_id, log_changes: changes_to_log}ns
     has_many :logs, as: :loggable, dependent: :destroy
 
     # Callback for creates and updates
