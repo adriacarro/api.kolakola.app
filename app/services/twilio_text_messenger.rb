@@ -9,11 +9,15 @@ class TwilioTextMessenger
   end
 
   def call
-    client = Twilio::REST::Client.new
-    client.messages.create({
-      from: Rails.application.credentials.dig(:twilio, :sender_id),
-      to: to,
-      body: message
-    })
+    begin
+      client = Twilio::REST::Client.new
+      client.messages.create({
+        from: Rails.application.credentials.dig(:twilio, :sender_id),
+        to: to,
+        body: message
+      })
+    rescue Twilio::REST::RestError => e
+      puts e.message
+    end
   end
 end
