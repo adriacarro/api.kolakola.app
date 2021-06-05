@@ -29,6 +29,6 @@ class WorkerChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
-    @user.logout!
+    @user.start_break!
   end
 end
