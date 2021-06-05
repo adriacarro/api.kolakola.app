@@ -1,5 +1,5 @@
 es:
   lines:
     notify:
-      ready: Ya es tu turno para %{service} en %{place} con el código %{code}
+      ready: Ya es tu turno para %{service} en %{place} con el código %{code} https://pelu-paki-alpha.vercel.app/
       almost: Casi es tu turno para %{service} en %{place}. Te queda aproximadamente %{minutes} minutos y %{seconds} segundos
