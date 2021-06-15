@@ -82,6 +82,15 @@ class Line < ApplicationRecord
     broadcast
   end
 
+  def remove_from_list
+    update(position: nil)
+    service.lines.waiting.where.not(id: id).each(&:move)
+  end
+
+  def move
+    update(position: position - 1)
+  end
+
   def notify_customer
     send_sms if customer.sms? && customer.phone.present? && (position.nil? || position == 2)
   end
