@@ -84,7 +84,7 @@ class Line < ApplicationRecord
 
   def remove_from_list
     update(position: nil)
-    service.lines.waiting.where.not(id: id).each(&:move)
+    service.lines.waiting.where.not(position: nil).each(&:move)
   end
 
   def move
