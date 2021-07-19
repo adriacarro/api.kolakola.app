@@ -95,11 +95,13 @@ class User < ApplicationRecord
 
   def start_break!
     update_columns(active: false)
+    broadcast(line: nil)
     services.each(&:broadcast)
   end
 
   def stop_break!
     update_columns(active: true)
+    broadcast(line: nil)
     services.each(&:active!)
     services.each(&:broadcast)
     call_to_next if attending_lines.in_process.none?
@@ -107,6 +109,8 @@ class User < ApplicationRecord
 
   # 1st step of line handshake
   def call_to_next
+    return unless active
+
     next_to_be_served = services.active.map{ |service| service.lines.waiting.first }.compact.shuffle.first
     return if next_to_be_served.nil? # No more attendees
 
@@ -115,7 +119,8 @@ class User < ApplicationRecord
   end
 
   def broadcast(line:)
-    WorkerChannel.broadcast_to self, ActiveModelSerializers::SerializableResource.new(line).serializable_hash
+    serializer = line.nil? ? ActiveModelSerializers::SerializableResource.new(self, serializer: TinyUserSerializer) : ActiveModelSerializers::SerializableResource.new(line)
+    line.nil? ? UserChannel.broadcast_to(self, serializer.serializable_hash) : WorkerChannel.broadcast_to(self, serializer.serializable_hash)
   end
 
   private
