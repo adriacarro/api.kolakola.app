@@ -45,6 +45,7 @@ class Service < ApplicationRecord
 
     super
     lines.active.each(&:abandoned!)
+    broadcast
   end
 
   def broadcast

@@ -74,6 +74,7 @@ class User < ApplicationRecord
 
   def logout!
     start_break! if worker?
+    services.select{ |service| service.user_services.count == 1 }.map(&:inactive!) if worker?
     update(log_out_at: Time.now, current_user_id: id)
   end
 
@@ -99,6 +100,7 @@ class User < ApplicationRecord
 
   def stop_break!
     update_columns(active: true)
+    services.each(&:active!)
     services.each(&:broadcast)
     call_to_next if attending_lines.in_process.none?
   end
