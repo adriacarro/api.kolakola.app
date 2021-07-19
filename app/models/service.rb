@@ -13,6 +13,9 @@ class Service < ApplicationRecord
   # Extensions
   translates :name
 
+  # Attributes
+  enum status: %i[active inactive]
+
   # Scopes
   default_scope -> { i18n.order(name: :asc) }
 
@@ -35,6 +38,13 @@ class Service < ApplicationRecord
 
   def free_workers?
     workers > in_process
+  end
+
+  def inactive!
+    return if inactive?
+
+    super
+    lines.active.each(&:abandoned!)
   end
 
   def broadcast

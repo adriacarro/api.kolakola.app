@@ -105,7 +105,7 @@ class User < ApplicationRecord
 
   # 1st step of line handshake
   def call_to_next
-    next_to_be_served = services.map{ |service| service.lines.waiting.first }.compact.shuffle.first
+    next_to_be_served = services.active.map{ |service| service.lines.waiting.first }.compact.shuffle.first
     return if next_to_be_served.nil? # No more attendees
 
     # Start line handshake
