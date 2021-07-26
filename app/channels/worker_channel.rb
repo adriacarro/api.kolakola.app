@@ -28,7 +28,10 @@ class WorkerChannel < ApplicationCable::Channel
     @user.attending_lines.pending.first&.abandoned!
   end
 
-  def unsubscribed
+  def logout
     @user.logout!
+  end
+
+  def unsubscribed
   end
 end
