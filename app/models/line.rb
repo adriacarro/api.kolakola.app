@@ -106,7 +106,6 @@ class Line < ApplicationRecord
   end
 
   private
-
   def assign_unique_code
     self.code = loop do
       code = SecureRandom.alphanumeric(6).upcase
